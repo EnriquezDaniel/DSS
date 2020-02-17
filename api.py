@@ -1,36 +1,50 @@
+import json
+
+# youtube
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import google_auth_oauthlib
 
-import json
+# TODO: Make a proper interface using metaclasses
+class AbstrctAPIInterface:
+    def poll(self):
+        pass
+    
+    def createMessage(self):
+        pass
 
-### global constants
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
 
-# fetches the latest video uploaded by each channel id in "channels"
-def poll(channels, devkey):
-    youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=devkey)
+class YouTubeAPI(AbstrctAPIInterface):
+    def __init__(self):
+        # constants
+        self.YOUTUBE_API_SERVICE_NAME = "youtube"
+        self.YOUTUBE_API_VERSION = "v3"
+        
+        # build api info from config file
+        with open("config.json") as config:
+            data = json.load(config)
+            self.key = data["youtubeAPIKey"]
+            self.channels = data["channels"]
 
-    for ch in channels:
-        request = youtube.activities().list(
-            part="snippet,contentDetails",
-            channelId=ch,
-            maxResults=1
-        )
+        # build youtube api
+        self.api = build(self.YOUTUBE_API_SERVICE_NAME, self.YOUTUBE_API_VERSION, developerKey=self.key)
 
-        response = request.execute()
+    def poll(self):
+        for ch in self.channels:
+            request = self.api.activities().list(
+                part="snippet,contentDetails",
+                channelId=ch,
+                maxResults=1
+            )
 
-        title = json.dumps(response["items"][0]["snippet"]["title"])
-        id = json.dumps(response["items"][0]["contentDetails"]["upload"]["videoId"])
+            response = request.execute()
 
-        print(title)
-        print(id)
-        print()
+            title = json.dumps(response["items"][0]["snippet"]["title"])
+            id = json.dumps(response["items"][0]["contentDetails"]["upload"]["videoId"])
 
-# main
-with open("config.json") as config:
-    data = json.load(config)
-    devkey = data["youtubeAPIKey"]
-    channels = data["channels"]
-    poll(channels, devkey)
+            print(title)
+            print(id)
+            print()
+
+yt = YouTubeAPI()
+yt.poll()
