@@ -1,9 +1,10 @@
 import json
 
 # youtube
+import google_auth_oauthlib
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import google_auth_oauthlib
+
 
 # TODO: Make a proper interface using metaclasses
 class AbstrctAPIInterface:
@@ -30,6 +31,8 @@ class YouTubeAPI(AbstrctAPIInterface):
         self.api = build(self.YOUTUBE_API_SERVICE_NAME, self.YOUTUBE_API_VERSION, developerKey=self.key)
 
     def poll(self):
+        result = []
+
         for ch in self.channels:
             request = self.api.activities().list(
                 part="snippet,contentDetails",
@@ -40,11 +43,22 @@ class YouTubeAPI(AbstrctAPIInterface):
             response = request.execute()
 
             title = json.dumps(response["items"][0]["snippet"]["title"])
-            id = json.dumps(response["items"][0]["contentDetails"]["upload"]["videoId"])
+            title = title.strip("\"")
 
-            print(title)
-            print(id)
-            print()
+            videoID = json.dumps(response["items"][0]["contentDetails"]["upload"]["videoId"])
+            videoID = videoID.strip("\"") #videoID initially has a pair of quotes surrounding it
+
+            link = "https://www.youtube.com/watch?v=" + videoID
+            result.append(dict([("title", title), ("link", link)])) #adds a new entry to the result
+
+        return result
+        
+    def createMessage()
 
 yt = YouTubeAPI()
-yt.poll()
+temp = yt.poll()
+
+for d in temp:
+    print(d["title"])
+    print(d["link"])
+    print()
