@@ -14,7 +14,7 @@ class AbstractAPIInterface:
     def poll(self):
         pass
     
-    def createMessage(self):
+    def createMessages(self):
         pass
 
 
@@ -31,11 +31,15 @@ class YouTubeAPI(AbstractAPIInterface):
             self.channels = data["channels"]
 
         # build youtube api
-        self.api = build(self.YOUTUBE_API_SERVICE_NAME, self.YOUTUBE_API_VERSION, developerKey=self.key)
+        self.api = build(
+            self.YOUTUBE_API_SERVICE_NAME,
+            self.YOUTUBE_API_VERSION,
+            developerKey=self.key
+        )
 
         #should we store this info in program memory or a file?
         self.currResults = []
-        self.prevResults = []
+        self.prevResults = [] #should probably be stored in a file before shutdown
 
     def poll(self):
         #if len(self.currResults) == 0
@@ -58,7 +62,9 @@ class YouTubeAPI(AbstractAPIInterface):
             videoID = videoID.strip("\"") #videoID initially has a pair of quotes surrounding it
 
             link = "https://www.youtube.com/watch?v=" + videoID
-            self.currResults.append(dict([("title", title), ("link", link)])) #adds a new entry to the result
+            self.currResults.append(
+                dict([("title", title), ("link", link)]) #adds a new entry to the result
+            )
 
         # check for changed results, add them to a new list,
         # create a list of messages, and return the messages
@@ -80,6 +86,15 @@ class YouTubeAPI(AbstractAPIInterface):
 
         msgs = []
         for r in results:
+            msg = r["title"] + "\n" + r["link"]
+            msgs.append(msg)
+        return msgs
+
+    # debug function (maybe future "refresh" (?) command)
+    # that returns a list of mesages for all entries in self.currResults
+    def createAllMessages():
+        msgs = []
+        for r in self.currResults:
             msg = r["title"] + "\n" + r["link"]
             msgs.append(msg)
         return msgs
