@@ -92,7 +92,7 @@ class YouTubeAPI(AbstractAPIInterface):
 
     # debug function (maybe future "refresh" (?) command)
     # that returns a list of mesages for all entries in self.currResults
-    def createAllMessages():
+    def createAllMessages(self):
         msgs = []
         for r in self.currResults:
             msg = r["title"] + "\n" + r["link"]
