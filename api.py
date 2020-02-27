@@ -100,9 +100,10 @@ class YouTubeAPI(AbstractAPIInterface):
         return msgs
 
 ### main for testing
-yt = YouTubeAPI()
+if __name__ == "__main__":
+    yt = YouTubeAPI()
 
-for i in range(2):
-    for m in yt.poll():
-        print(m)
-    print()
+    for i in range(2):
+        for m in yt.poll():
+            print(m)
+        print()
